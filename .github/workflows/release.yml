@@ -1,0 +1,132 @@
+name: Release
+
+# 打 tag（形如 v1.5）就自动出包并发布 Release；也可以在 Actions 页面手动触发。
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '版本号（不带 v，例如 1.5）'
+        required: true
+
+# 创建 Release 需要写权限
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # 生成发布说明要拿历史提交
+
+      - name: 准备 JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: 准备 Android SDK 组件
+        run: |
+          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          echo "ANDROID_SDK_ROOT=$SDK" >> "$GITHUB_ENV"
+          if [ -x "$SDK/cmdline-tools/latest/bin/sdkmanager" ]; then
+            SDKM="$SDK/cmdline-tools/latest/bin/sdkmanager"
+          else
+            SDKM="$(command -v sdkmanager || true)"
+          fi
+          if [ -n "$SDKM" ]; then
+            yes | "$SDKM" --licenses >/dev/null 2>&1 || true
+            "$SDKM" "platforms;android-34" "build-tools;34.0.0" >/dev/null 2>&1 || true
+          fi
+          ls "$SDK/build-tools" "$SDK/platforms" || true
+
+      # 用仓库密钥签名，保证新版本能覆盖安装在旧版本上。
+      # 没配置的话 build.sh 会临时生成一张证书，签名不同 -> 只能卸载重装。
+      - name: 还原签名证书
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            mkdir -p "$HOME/.countday-env"
+            printf '%s' "$KEYSTORE_BASE64" | base64 -d > "$HOME/.countday-env/debug.keystore"
+            echo "已使用仓库密钥签名"
+          else
+            echo "::warning::未配置 KEYSTORE_BASE64，将用临时证书签名；这样的 APK 无法覆盖安装在旧版本上。"
+          fi
+
+      - name: 计算版本号
+        id: ver
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            V="${{ github.event.inputs.version }}"
+          else
+            V="${GITHUB_REF_NAME}"
+          fi
+          V="${V#v}"
+          IFS='.' read -r MA MI PA <<< "$V"
+          MA="${MA:-0}"; MI="${MI:-0}"; PA="${PA:-0}"
+          # 1.5 -> 10500；1.5.2 -> 10502
+          CODE=$((10#$MA * 10000 + 10#$MI * 100 + 10#$PA))
+          {
+            echo "name=$V"
+            echo "code=$CODE"
+            echo "tag=v$V"
+          } >> "$GITHUB_OUTPUT"
+          echo "版本 $V（versionCode $CODE）"
+
+      - name: 离线测试
+        run: bash tools/run-tests.sh
+
+      - name: 构建 APK
+        env:
+          VERSION_NAME: ${{ steps.ver.outputs.name }}
+          VERSION_CODE: ${{ steps.ver.outputs.code }}
+        run: ./build.sh
+
+      - name: 生成发布说明
+        run: |
+          {
+            echo "## 纪念日 v${{ steps.ver.outputs.name }}"
+            echo
+            echo "下载下面的 APK 直接安装；已经装过旧版本的可以直接覆盖安装，配置和组件都不会丢。"
+            echo
+            PREV="$(git describe --tags --abbrev=0 'HEAD^' 2>/dev/null || true)"
+            if [ -n "$PREV" ]; then
+              echo "### 自 $PREV 以来的提交"
+            else
+              echo "### 提交记录"
+            fi
+            echo
+            if [ -n "$PREV" ]; then
+              git log --pretty='- %s' "$PREV..HEAD"
+            else
+              git log --pretty='- %s' -n 20
+            fi
+          } > "$RUNNER_TEMP/notes.md"
+          cat "$RUNNER_TEMP/notes.md"
+
+      - name: 发布 GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.ver.outputs.tag }}
+          name: v${{ steps.ver.outputs.name }}
+          body_path: ${{ runner.temp }}/notes.md
+          files: dist/*.apk
+          fail_on_unmatched_files: true
+
+      # Gitee 没有 GitHub Actions 那样的免费 CI，所以构建在 GitHub 完成后用 API 同步过去。
+      # 失败不影响 GitHub Release，只会在日志里提示。
+      - name: 同步到 Gitee Release
+        continue-on-error: true
+        env:
+          GITEE_TOKEN: ${{ secrets.GITEE_TOKEN }}
+          GITEE_REPO: ${{ secrets.GITEE_REPO }}
+          TAG: ${{ steps.ver.outputs.tag }}
+          VERSION_NAME: ${{ steps.ver.outputs.name }}
+          NOTES_FILE: ${{ runner.temp }}/notes.md
+        run: bash tools/publish-gitee.sh

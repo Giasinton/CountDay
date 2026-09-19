@@ -229,3 +229,7 @@ bash tools/run-tests.sh   # DayMath：闰年、跨年、同日、零点闹钟时
 
 ```bash
 ```
+
+## 发布
+
+自动发布（GitHub Release + 同步 Gitee）的配置见 [`RELEASE.md`](RELEASE.md)。
