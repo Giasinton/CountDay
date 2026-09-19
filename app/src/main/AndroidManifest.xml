@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+      没有 MAIN/LAUNCHER 入口：应用不出现在桌面抽屉里，也没有启动图标。
+      唯一的 Activity 是小组件配置页，只能由系统的小组件流程或点击小组件唤起。
+    -->
+    <!-- 查桌面应用（HOME）用，用于把图片 URI 的读权限授给它 -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.HOME" />
+        </intent>
+    </queries>
+
+    <application
+        android:allowBackup="false"
+        android:icon="@drawable/ic_countday"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/ConfigTheme">
+
+        <activity
+            android:name=".ConfigActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:configChanges="orientation|screenSize|keyboardHidden|uiMode|locale|layoutDirection"
+            android:label="@string/config_title_new">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
+        <!-- 只读地暴露成品图片给桌面读取（setImageViewUri 用），图片不经过 Binder 传输 -->
+        <provider
+            android:name=".ImageProvider"
+            android:authorities="io.giasinton.countday.image"
+            android:exported="false"
+            android:grantUriPermissions="true" />
+
+        <!--
+          纯 BroadcastReceiver 驱动：没有 Service，也没有常驻进程。
+          跨天刷新由 AlarmManager 在每天 0 点后投递一次广播完成。
+        -->
+        <receiver
+            android:name=".CountDayWidgetProvider"
+            android:exported="false"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.appwidget.action.APPWIDGET_OPTIONS_CHANGED" />
+                <action android:name="io.giasinton.countday.action.MIDNIGHT" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.DATE_CHANGED" />
+                <action android:name="android.intent.action.LOCALE_CHANGED" />
+                <!-- 自己被覆盖安装后自动重绘所有实例（同理，渲染算法升级时成品图也要重算） -->
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/countday_widget_info" />
+        </receiver>
+    </application>
+
+</manifest>

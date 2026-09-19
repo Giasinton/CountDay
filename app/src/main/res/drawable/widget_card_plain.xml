@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 放了图片时用的卡片背景：去掉描边，避免从图片的透明边缘透出一圈暗线 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/widget_bg" />
+    <corners android:radius="20dp" />
+</shape>

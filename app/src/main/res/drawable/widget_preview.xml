@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 低版本桌面（不支持 previewLayout）时用的小组件示意图：卡片 + 标题条 + 大数字块 + 日期条 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="110dp"
+    android:height="110dp"
+    android:viewportWidth="110"
+    android:viewportHeight="110">
+
+    <path
+        android:fillColor="#F2FFFFFF"
+        android:pathData="M18,2 H92 A16,16 0 0 1 108,18 V92 A16,16 0 0 1 92,108 H18 A16,16 0 0 1 2,92 V18 A16,16 0 0 1 18,2 Z" />
+    <path
+        android:strokeColor="#1A000000"
+        android:strokeWidth="1"
+        android:fillColor="#00000000"
+        android:pathData="M18,2.5 H92 A15.5,15.5 0 0 1 107.5,18 V92 A15.5,15.5 0 0 1 92,107.5 H18 A15.5,15.5 0 0 1 2.5,92 V18 A15.5,15.5 0 0 1 18,2.5 Z" />
+
+    <!-- 标题 -->
+    <path
+        android:fillColor="#99000000"
+        android:pathData="M36,24 h38 v6 h-38 z" />
+    <!-- 大数字 -->
+    <path
+        android:fillColor="#E6000000"
+        android:pathData="M30,40 h50 v22 h-50 z" />
+    <!-- 日期 -->
+    <path
+        android:fillColor="#66000000"
+        android:pathData="M38,70 h34 v5 h-34 z" />
+</vector>

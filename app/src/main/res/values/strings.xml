@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">纪念日</string>
+    <string name="widget_description">记录某个日期还有多少天，或从某天起已经过了多少天</string>
+
+    <!-- 小组件 -->
+    <string name="tap_to_configure">点击设置日期</string>
+    <!-- 选择器里的示意图示例内容 -->
+    <string name="preview_sample_title">生日</string>
+    <string name="preview_sample_number">128</string>
+    <string name="preview_sample_date">目标 2026-12-24</string>
+    <string name="today">今天</string>
+    <string name="unit_days">天</string>
+    <string name="date_line_target">目标 %s</string>
+    <string name="date_line_start">起于 %s</string>
+
+    <!-- 配置页 -->
+    <string name="config_title_new">新建纪念日</string>
+    <string name="config_title_edit">编辑纪念日</string>
+    <string name="hint_title">标题（例如：生日）</string>
+    <string name="label_mode">类型</string>
+    <string name="mode_countdown">倒计时</string>
+    <string name="mode_count_up">已经过去多少天</string>
+    <string name="label_date_countdown">目标日期</string>
+    <string name="label_date_count_up">起始日期</string>
+    <string name="preview_countdown_future">还有 %1$d 天</string>
+    <string name="preview_countdown_today">就是今天</string>
+    <string name="preview_countdown_past">已经过去 %1$d 天</string>
+    <string name="preview_count_up_future">距离开始还有 %1$d 天</string>
+    <string name="preview_count_up_today">从今天开始</string>
+    <string name="preview_count_up_past">已经过去 %1$d 天</string>
+    <string name="action_save">保存</string>
+    <string name="action_cancel">取消</string>
+    <string name="action_clear">清空</string>
+    <string name="toast_saved">已保存</string>
+    <string name="toast_cleared">已清空</string>
+    <string name="default_title">纪念日</string>
+
+    <!-- 背景色 / 透明度 -->
+    <string name="label_bg_color">背景色</string>
+    <string name="label_bg_alpha">不透明度</string>
+    <string name="bg_default">默认</string>
+    <string name="bg_theme_color">跟随系统主题</string>
+    <string name="target_bg">背景色</string>
+    <string name="target_text">文字颜色</string>
+    <string name="label_text_color">文字颜色</string>
+    <string name="alpha_percent">%1$d%%</string>
+
+    <!-- 图片 -->
+    <string name="label_image">图片（PNG 透明背景也支持）</string>
+    <string name="action_pick_image">选择图片</string>
+    <string name="action_remove_image">移除</string>
+    <string name="action_crop">裁剪</string>
+    <string name="action_crop_done">收起裁剪</string>
+    <string name="action_crop_reset">重置</string>
+    <string name="image_none">当前：无图片</string>
+    <string name="image_picked">当前：已选择新图片</string>
+    <string name="image_existing">当前：已有图片</string>
+    <string name="image_will_remove">当前：保存后会移除图片</string>
+    <string name="hint_image">图片会等比放大并居中裁切，正好铺满卡片（不会留白），透明部分会露出背景色。</string>
+    <string name="label_preview">预览</string>
+    <string name="toast_image_failed">图片读取失败，请换一张试试</string>
+
+    <!-- 文字排版 -->
+    <string name="label_text_pos">文字位置</string>
+    <string name="pos_top">上</string>
+    <string name="pos_center">中</string>
+    <string name="pos_bottom">下</string>
+    <string name="align_left">左</string>
+    <string name="align_center">居中</string>
+    <string name="align_right">右</string>
+    <string name="label_text_size">文字大小</string>
+    <string name="label_offset_x">水平微调</string>
+    <string name="label_offset_y">垂直微调</string>
+    <string name="offset_percent">%1$+d%%</string>
+    <string name="size_percent">%1$d%%</string>
+    <string name="hint_no_source">原图副本已不在（可能被系统清理），重新裁剪会基于当前成品图，画质会略差。</string>
+    <string name="hint_crop">拖动图片挪动位置，双指缩放或用 ± 按钮；图片始终铺满框（拖到头就停，不会露出空白），框内就是小组件里显示的部分。</string>
+
+    <!-- 尺寸 -->
+    <string name="label_size">卡片尺寸</string>
+    <string name="size_fill">填满格子</string>
+    <string name="size_image">跟随图片</string>
+    <string name="size_custom">自定义</string>
+    <string name="label_corner_radius">圆角</string>
+    <string name="label_width">宽</string>
+    <string name="label_height">高</string>
+    <string name="size_lock_square">锁定为正方形</string>
+    <string name="size_dp">%1$d dp</string>
+    <string name="hint_size">「跟随图片」让卡片按图片的宽高比缩放（不裁剪、不留白），比例由所选图片决定，需要先选图片；「自定义」按格子短边的百分比缩放卡片（100% = 最大的正方形），超出格子的部分透明；需要系统 Android 12 及以上。</string>
+    <string name="action_zoom_in">＋</string>
+    <string name="action_zoom_out">－</string>
+</resources>

@@ -1,0 +1,22 @@
+# Gradle / Android Studio
+.gradle/
+build/
+local.properties
+*.iml
+.idea/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# 构建产物
+dist/
+
+# 签名文件
+*.keystore
+*.jks
+
+# 隔离工具链（如果在项目里）
+.countday-env/
+.env/
+
+.DS_Store

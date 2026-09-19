@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 配置页以对话框形式出现，用户返回即取消（不会新增/改动小组件） -->
+    <style name="ConfigTheme" parent="@android:style/Theme.DeviceDefault.Dialog.Alert">
+        <item name="android:windowCloseOnTouchOutside">false</item>
+    </style>
+</resources>
