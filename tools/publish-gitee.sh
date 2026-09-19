@@ -42,6 +42,22 @@ NOTES="${TITLE}
 
 下载 APK 直接安装；已装旧版本可直接覆盖安装。"
 
+# 0) 先自检令牌：能拿到自己的用户名，说明令牌本身是有效的
+if [ "${DRY_RUN:-0}" != "1" ]; then
+  echo "==> 校验 Gitee 令牌"
+  ME="$(curl -sS --max-time 20 "$API/user?access_token=$GITEE_TOKEN" || echo '')"
+  USER_NAME="$(printf '%s' "$ME" | python3 -c 'import json,sys
+try: print(json.load(sys.stdin).get("login",""))
+except Exception: print("")' 2>/dev/null || true)"
+  if [ -z "$USER_NAME" ]; then
+    echo "    令牌无效或已过期。接口返回：" >&2
+    printf '%s\n' "$ME" | head -c 300 >&2; echo >&2
+    echo "    去 Gitee → 设置 → 私人令牌 重新生成一个（勾 projects）" >&2
+    exit 1
+  fi
+  echo "    令牌有效，身份：$USER_NAME"
+fi
+
 echo "==> Gitee 发布：$GITEE_REPO  $TAG"
 echo "    APK : $APK ($(du -h "$APK" | cut -f1))"
 echo "    说明: $TITLE"
@@ -56,6 +72,11 @@ api() {
     echo "    HTTP $http" >&2
     head -c 600 "$out" >&2 || true
     echo >&2
+    case "$http" in
+      401) echo "    -> 令牌无效/过期，重新生成 GITEE_TOKEN" >&2 ;;
+      403) echo "    -> 令牌权限不够，生成时勾上 projects" >&2 ;;
+      404) echo "    -> 检查 GITEE_REPO 是否写成 owner/repo；tag $TAG 是否已 push 到 Gitee" >&2 ;;
+    esac
     rm -f "$out"
     return 1
   fi
