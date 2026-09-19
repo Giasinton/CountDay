@@ -84,16 +84,33 @@ api() {
   rm -f "$out"
 }
 
-json_get() {  # 从 stdin 的 JSON 里取一个字符串字段（不依赖 jq）
-  python3 -c 'import json,sys; d=json.load(sys.stdin); print(d.get(sys.argv[1], ""))' "$1"
+# 从 stdin 的 JSON 里取一个字段值；不依赖 jq。
+# 注意 Gitee 在"资源不存在"时会返回 HTTP 200 + body `null`，这里必须容错。
+json_get() {
+  python3 -c '
+import json, sys
+try:
+    d = json.load(sys.stdin)
+except Exception:
+    print(""); raise SystemExit
+if isinstance(d, dict):
+    print(d.get(sys.argv[1], "") or "")
+else:
+    print("")
+' "$1"
 }
 
 # 1) 先看这个 tag 是不是已经有 Release 了（重跑时复用，避免报"已存在"）
 echo "==> 查询已有 Release"
 RELEASE_ID=""
 if EXISTING="$(api GET "$API/repos/$GITEE_REPO/releases/tags/$TAG?access_token=$GITEE_TOKEN" 2>/dev/null)"; then
+  # Gitee 对"没有这个 Release"返回 200 + null，所以这里要看取到的 id 是否为空
   RELEASE_ID="$(printf '%s' "$EXISTING" | json_get id)"
-  echo "    已存在，release id = $RELEASE_ID"
+  if [ -n "$RELEASE_ID" ]; then
+    echo "    已存在，release id = $RELEASE_ID"
+  else
+    echo "    还没有，接着创建"
+  fi
 fi
 
 # 2) 没有就创建
@@ -146,8 +163,7 @@ if [ -n "$RELEASE_ID" ]; then
   fi
 
   echo "==> 上传 APK"
-  api POST "$API/repos/$GITEE_REPO/releases/$RELEASE_ID/attach_files" \
-    --data-urlencode "access_token=$GITEE_TOKEN" \
+  api POST "$API/repos/$GITEE_REPO/releases/$RELEASE_ID/attach_files?access_token=$GITEE_TOKEN" \
     -F "file=@$APK" >/dev/null
   echo "完成：https://gitee.com/$GITEE_REPO/releases/tag/$TAG"
 fi
